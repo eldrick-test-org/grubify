@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Trust Azure Container Apps ingress proxies
+    options.KnownProxies.Add(IPAddress.Parse("100.100.0.14"));
+    options.KnownProxies.Add(IPAddress.Parse("100.100.0.161"));
+    // Allow forwarded headers from private networks (Azure Container Apps)
+    options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("100.100.0.0"), 16));
 });
 
 // Add CORS
