@@ -54,6 +54,9 @@ app.UseCors("AllowReactApp");
 
 app.UseAuthorization();
 
+// Add a simple health endpoint for readiness probes
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
 app.MapControllers();
 
 app.Run();
