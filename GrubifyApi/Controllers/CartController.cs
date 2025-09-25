@@ -9,8 +9,6 @@ namespace GrubifyApi.Controllers
     {
         // In-memory cart storage (in production, use database)
         private static readonly Dictionary<string, Cart> UserCarts = new();
-        
-
 
         [HttpGet("{userId}")]
         public ActionResult<Cart> GetCart(string userId)
