@@ -33,7 +33,7 @@ module resources 'resources.bicep' = {
 // Subscription-scoped RBAC for SRE Agent managed identity
 // ============================================================
 module subscriptionRbac 'modules/subscription-rbac.bicep' = {
-  name: 'subscription-rbac'
+  name: 'subscription-rbac-${environmentName}-${location}'
   params: {
     principalId: resources.outputs.identityPrincipalId
   }

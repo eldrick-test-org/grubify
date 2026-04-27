@@ -24,6 +24,23 @@ if [ -z "$APP_URL" ]; then
   APP_URL=$(azd env get-values 2>/dev/null | grep "^CONTAINER_APP_URL=" | cut -d'=' -f2 | tr -d '"')
 fi
 
+# Fallback: some azd deployments leave CONTAINER_APP_URL empty in the env file.
+# In that case, resolve the ingress FQDN directly from the deployed Container App.
+if [ -z "$APP_URL" ]; then
+  RESOURCE_GROUP=$(azd env get-value AZURE_RESOURCE_GROUP 2>/dev/null | tr -d '\r')
+  CONTAINER_APP_NAME=$(azd env get-value CONTAINER_APP_NAME 2>/dev/null | tr -d '\r')
+  if [ -n "$RESOURCE_GROUP" ] && [ -n "$CONTAINER_APP_NAME" ]; then
+    FQDN=$(az containerapp show \
+      --name "$CONTAINER_APP_NAME" \
+      --resource-group "$RESOURCE_GROUP" \
+      --query "properties.configuration.ingress.fqdn" \
+      -o tsv 2>/dev/null | tr -d '\r')
+    if [ -n "$FQDN" ] && [ "$FQDN" != "None" ]; then
+      APP_URL="https://${FQDN}"
+    fi
+  fi
+fi
+
 if [ -z "$APP_URL" ]; then
   echo "Error: Could not determine Grubify URL."
   echo "Usage: ./scripts/break-app.sh [https://your-app-url] [request-count] [sleep-seconds]"
@@ -43,7 +60,8 @@ echo ""
 
 # Step 1: Check app is healthy first
 echo "Step 1: Checking app health..."
-HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${APP_URL}/health" 2>/dev/null || echo "000")
+# Grubify doesn't expose /health publicly; use a lightweight API route instead.
+HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${APP_URL}/api/restaurants" 2>/dev/null || echo "000")
 if [ "$HEALTH_STATUS" = "200" ]; then
   echo "  ✓ App is healthy (HTTP ${HEALTH_STATUS})"
 else
@@ -81,10 +99,10 @@ echo ""
 
 # Step 3: Verify app state
 echo "Step 3: Checking app state after load..."
-FINAL_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${APP_URL}/health" 2>/dev/null || echo "000")
-echo "  Health check: HTTP ${FINAL_STATUS}"
-MENU_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${APP_URL}/api/menu" 2>/dev/null || echo "000")
-echo "  Menu API:     HTTP ${MENU_STATUS}"
+FINAL_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${APP_URL}/api/restaurants" 2>/dev/null || echo "000")
+echo "  Restaurants API: HTTP ${FINAL_STATUS}"
+CART_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${APP_URL}/api/cart/demo-user/items" 2>/dev/null || echo "000")
+echo "  Cart API:        HTTP ${CART_STATUS}"
 echo ""
 
 echo "============================================="
