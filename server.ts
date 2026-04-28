@@ -2,6 +2,7 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import { Pool } from 'pg';
+import rateLimit from 'express-rate-limit';
 
 const pool = new Pool({
     user: 'dbuser',
@@ -18,7 +19,12 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-app.get("/", (req: Request, res: Response) => {
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+});
+
+app.get("/", limiter, (req: Request, res: Response) => {
     // Changed to req.query.q to get query string parameter
     const search = req.query.q as string || "";
 
