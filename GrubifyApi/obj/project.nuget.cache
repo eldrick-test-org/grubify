@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "DaZ82wzb448=",
+  "success": true,
+  "projectFilePath": "/home/runner/work/grubify/grubify/GrubifyApi/GrubifyApi.csproj",
+  "expectedPackageFiles": [
+    "/home/runner/.nuget/packages/microsoft.aspnetcore.openapi/9.0.8/microsoft.aspnetcore.openapi.9.0.8.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
