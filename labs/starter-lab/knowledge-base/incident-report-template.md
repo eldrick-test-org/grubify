@@ -61,6 +61,9 @@ Use this exact markdown structure for the issue body:
 - **RestartCount:** <value>
 - **MemoryPercentage:** <value and interpretation>
 - **UsageNanoCores:** <value if relevant>
+- **Alert description text:** <current description shown on the fired alert>
+- **Probe target and validation:** <URL/path + status/content check used by the active synthetic test>
+- **Availability by location:** <per-region pass/fail counts for the alert window>
 
 ## Root Cause
 
@@ -124,3 +127,4 @@ When generating evidence, use `ExecutePythonCode` to create charts:
 3. **Show before/after** — compare the anomaly window to the normal baseline
 4. **Actionable items** — every report must end with concrete next steps
 5. **Link resources** — include full ARM resource IDs for quick portal navigation
+6. **Availability incidents** — ensure alert description matches the real synthetic probe target (for example `/` vs legacy `/api/health`) and include location-level outcomes
